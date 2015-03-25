@@ -7,6 +7,13 @@ import javax.enterprise.context.RequestScoped;
 import javax.ws.rs.*;
 import javax.xml.bind.*;
 
+import org.json.*;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+	
+
 
 @RequestScoped
 @Path("/products")
@@ -19,14 +26,13 @@ public class ProductResource {
 		try {
 			JAXBContext jaxbContext1 = JAXBContext.newInstance(ProductsXML.class);
 			Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
-			File XMLfile = new File("C:\\School\\Webtech3\\REST\\Products.xml");
+			File XMLfile = new File("C:\\School\\Webtech3\\REST\\Products.json");
 			ProductsXML productsXML = (ProductsXML)jaxbUnmarshaller.unmarshal(XMLfile);
 			ArrayList<Product> listOfProducts = productsXML.getProducts();
 			
 			for(Product product : listOfProducts) {
-				htmlString += "<b>ShortName : " + product.getShortname() + "</b><br>";
+				htmlString += "<b>ShortName : " + product.getName() + "</b><br>";
 				htmlString += "Id : " + product.getId() + "<br>";
-				htmlString += "SKU : " + product.getSku() + "<br>";
 				htmlString += "Brand : " + product.getBrand() + "<br>";
 				htmlString += "Description : " + product.getDescription() + "<br>";
 				htmlString += "Price : " + product.getPrice() + "<br>";
@@ -41,22 +47,30 @@ public class ProductResource {
 	
 	@GET
 	@Produces({"application/json"})
-	public String getProductsJSON() {
+	public String getProductsJSON() throws FileNotFoundException, IOException, ParseException {
 		String jsonString = "{\"products\" : [";
 		try {
 			JAXBContext jaxbContext1 = JAXBContext.newInstance(ProductsXML.class);
 			Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
-			File XMLfile = new File("C:\\School\\Webtech3\\REST\\Products.xml");
-			ProductsXML productsXML = (ProductsXML)jaxbUnmarshaller.unmarshal(XMLfile);
+			File Jsonfile = new File("C:\\School\\Webtech3\\REST\\Products.json");
+			ProductsXML productsXML = (ProductsXML)jaxbUnmarshaller.unmarshal(Jsonfile);
 			ArrayList<Product> listOfProducts = productsXML.getProducts();
-			
-			for(Product product : listOfProducts) {
-				jsonString += "{\"shortname\" : \"" + product.getShortname() + "\",";
-				jsonString += "\"id\" : " + product.getId() + ",";
-				jsonString += "\"sku\" : \"" + product.getSku() + "\",";
-				jsonString += "\"brand\" : \"" + product.getBrand() + "\",";
-				jsonString += "\"description\" : \"" + product.getDescription() + "\",";
-				jsonString += "\"price\" : " + product.getPrice() + "},";
+		    
+			JSONParser parser = new JSONParser();
+			 	 
+	        Object obj = parser.parse(new FileReader(
+	            		"C:\\School\\Webtech3\\REST\\Products.json"));
+	        
+	        JSONObject jsonObject = (JSONObject) obj;
+	        JSONArray jArray = (JSONArray) jsonObject.get("products");
+	        
+	 		int i = 0;    
+			for(Object product : jArray) {
+				jsonString += "{\"name\" : \"" + ((Product) product).getName() + "\",";
+				jsonString += "\"id\" : " + ((Product) product).getId() + ",";
+				jsonString += "\"brand\" : \"" + ((Product) product).getBrand() + "\",";
+				jsonString += "\"description\" : \"" + ((Product) product).getDescription() + "\",";
+				jsonString += "\"price\" : " + ((Product) product).getPrice() + "},";
 			}
 			jsonString = jsonString.substring(0, jsonString.length()-1);
 			jsonString += "]}";
@@ -71,7 +85,7 @@ public class ProductResource {
 	@Produces({"text/xml"})
 	public String getProductsXML() {
 		String content = "";
-		File XMLfile = new File("C:\\School\\Webtech3\\REST\\Products.xml");
+		File XMLfile = new File("C:\\School\\Webtech3\\REST\\Products.json");
 		try {
 			content = new Scanner(XMLfile).useDelimiter("\\Z").next();
 		} 
@@ -90,16 +104,15 @@ public class ProductResource {
 			// get all products
 			JAXBContext jaxbContext1 = JAXBContext.newInstance(ProductsXML.class);
 			Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
-			File XMLfile = new File("C:\\School\\Webtech3\\REST\\Products.xml");
+			File XMLfile = new File("C:\\School\\Webtech3\\REST\\Products.json");
 			ProductsXML productsXML = (ProductsXML)jaxbUnmarshaller.unmarshal(XMLfile);
 			ArrayList<Product> listOfProducts = productsXML.getProducts();
 			
-			// look for the product, using the shortname
+			// look for the product, using the name
 			for(Product product : listOfProducts) {
-				if(shortname.equalsIgnoreCase(product.getShortname())) {
-					jsonString += "{\"shortname\" : \"" + product.getShortname() + "\",";
+				if(shortname.equalsIgnoreCase(product.getName())) {
+					jsonString += "{\"name\" : \"" + product.getName() + "\",";
 					jsonString += "\"id\" : " + product.getId() + ",";
-					jsonString += "\"sku\" : \"" + product.getSku() + "\",";
 					jsonString += "\"brand\" : \"" + product.getBrand() + "\",";
 					jsonString += "\"description\" : \"" + product.getDescription() + "\",";
 					jsonString += "\"price\" : " + product.getPrice() + "}";
@@ -113,21 +126,21 @@ public class ProductResource {
 	}
 	
 	@GET
-	@Path("/{shortname}")
+	@Path("/{name}")
 	@Produces({"text/xml"})
-	public String getProductXML(@PathParam("shortname") String shortname) {
+	public String getProductXML(@PathParam("name") String name) {
 		String xmlString = "";
 		try {
 			// get all products
 			JAXBContext jaxbContext1 = JAXBContext.newInstance(ProductsXML.class);
 			Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
-			File XMLfile = new File("C:\\School\\Webtech3\\REST\\Products.xml");
+			File XMLfile = new File("C:\\School\\Webtech3\\REST\\Products.json");
 			ProductsXML productsXML = (ProductsXML)jaxbUnmarshaller.unmarshal(XMLfile);
 			ArrayList<Product> listOfProducts = productsXML.getProducts();
 			
 			// look for the product, using the shortname
 			for(Product product : listOfProducts) {
-				if(shortname.equalsIgnoreCase(product.getShortname())) {
+				if(name.equalsIgnoreCase(product.getName())) {
 					JAXBContext jaxbContext2 = JAXBContext.newInstance(Product.class);
 					Marshaller jaxbMarshaller = jaxbContext2.createMarshaller();
 					StringWriter sw = new StringWriter();
@@ -164,7 +177,7 @@ public class ProductResource {
 			// get all products
 			JAXBContext jaxbContext1 = JAXBContext.newInstance(ProductsXML.class);
 			Unmarshaller jaxbUnmarshaller1 = jaxbContext1.createUnmarshaller();
-			File XMLfile = new File("C:/School/Webtech3/REST/Products.xml");
+			File XMLfile = new File("C:/School/Webtech3/REST/Products.json");
 			ProductsXML productsXML = (ProductsXML)jaxbUnmarshaller1.unmarshal(XMLfile);
 			ArrayList<Product> listOfProducts = productsXML.getProducts();
 			

@@ -6,11 +6,18 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Product {
 	
 	private int id;
-	private String shortname;
+	private String name;
 	private String brand;
-	private String sku;
 	private String description;
 	private double price;
+	
+	public Product(int id, String name, String brand, String description, double price ){
+		this.id = id;
+		this.name = name;
+		this.brand = brand;
+		this.description = description;
+		this.price = price;
+	}
 	
 	public int getId() {
 		return id;
@@ -18,17 +25,11 @@ public class Product {
 	public void setId(int id) {
 		this.id = id;
 	}
-	public String getShortname() {
-		return shortname;
+	public String getName() {
+		return name;
 	}
-	public void setShortname(String shortname) {
-		this.shortname = shortname;
-	}
-	public String getSku() {
-		return sku;
-	}
-	public void setSku(String sku) {
-		this.sku = sku;
+	public void setName(String name) {
+		this.name = name;
 	}
 	public String getBrand() {
 		return brand;
